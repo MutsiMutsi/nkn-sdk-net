@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-using Utf8Json;
-using Utf8Json.Resolvers;
-
 using NknSdk.Common.Protobuf;
 using NknSdk.Common.Protobuf.Transaction;
 using NknSdk.Common.Rpc.Results;
@@ -14,6 +11,8 @@ using NknSdk.Common.Extensions;
 using NknSdk.Common.Options;
 using NknSdk.Wallet;
 using NknSdk.Wallet.Models;
+using Newtonsoft.Json;
+using System.Text;
 
 namespace NknSdk.Common.Rpc
 {
@@ -26,21 +25,21 @@ namespace NknSdk.Common.Rpc
             httpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(10) };
         }
 
-        public static async Task<GetWsAddressResult> GetWsAddress(string nodeUri, string address)
+        public static GetWsAddressResult GetWsAddress(string nodeUri, string address)
         {
             address.ThrowIfNullOrEmpty("remoteAddress is empty");
 
-            return await CallRpc<GetWsAddressResult>(nodeUri, "getwsaddr", new { address });
+            return CallRpc<GetWsAddressResult>(nodeUri, "getwsaddr", new { address });
         }
 
-        public static async Task<GetWsAddressResult> GetWssAddress(string nodeUri, string address)
+        public static GetWsAddressResult GetWssAddress(string nodeUri, string address)
         {
             address.ThrowIfNullOrEmpty("remoteAddress is empty");
 
-            return await CallRpc<GetWsAddressResult>(nodeUri, "getwssaddr", new { address });
+            return CallRpc<GetWsAddressResult>(nodeUri, "getwssaddr", new { address });
         }
 
-        public static async Task<GetSubscribersWithMetadataResult> GetSubscribersWithMetadata(
+        public static GetSubscribersWithMetadataResult GetSubscribersWithMetadata(
             string nodeUri,
             string topic,
             int offset = 0,
@@ -58,10 +57,10 @@ namespace NknSdk.Common.Rpc
                 txPool
             };
 
-            return await CallRpc<GetSubscribersWithMetadataResult>(nodeUri, "getsubscribers", parameters);
+            return CallRpc<GetSubscribersWithMetadataResult>(nodeUri, "getsubscribers", parameters);
         }
 
-        public static async Task<GetSubscribersResult> GetSubscribers(
+        public static GetSubscribersResult GetSubscribers(
             string nodeUri,
             string topic,
             int offset = 0,
@@ -79,72 +78,72 @@ namespace NknSdk.Common.Rpc
                 txPool
             };
 
-            return await CallRpc<GetSubscribersResult>(nodeUri, "getsubscribers", parameters);
+            return CallRpc<GetSubscribersResult>(nodeUri, "getsubscribers", parameters);
         }
 
-        public static async Task<int> GetSubscribersCount(string nodeUri, string topic)
+        public static int GetSubscribersCount(string nodeUri, string topic)
         {
             topic.ThrowIfNullOrEmpty("topic is empty");
 
             var parameters = new { topic };
 
-            return await CallRpc<int>(nodeUri, "getsubscriberscount", parameters);
+            return CallRpc<int>(nodeUri, "getsubscriberscount", parameters);
         }
 
-        public static async Task<GetSubscriptionResult> GetSubscription(string nodeUri, string topic, string subscriber)
+        public static GetSubscriptionResult GetSubscription(string nodeUri, string topic, string subscriber)
         {
             topic.ThrowIfNullOrEmpty("topic is empty");
             subscriber.ThrowIfNullOrEmpty("subscriber is empty");
 
             var parameters = new { topic, subscriber };
 
-            return await CallRpc<GetSubscriptionResult>(nodeUri, "getsubscription", parameters);
+            return CallRpc<GetSubscriptionResult>(nodeUri, "getsubscription", parameters);
         }
 
-        public static async Task<GetBalanceResult> GetBalanceByAddress(string nodeUri, string address)
+        public static GetBalanceResult GetBalanceByAddress(string nodeUri, string address)
         {
             address.ThrowIfNullOrEmpty("remoteAddress is empty");
 
             var parameters = new { address };
 
-            var rawResult = await CallRpc<GetBalanceRpcResult>(nodeUri, "getbalancebyaddr", parameters);
+            var rawResult = CallRpc<GetBalanceRpcResult>(nodeUri, "getbalancebyaddr", parameters);
 
             return new GetBalanceResult { Amount = decimal.Parse(rawResult.Amount), Address = address };
         }
 
-        public static async Task<GetNonceByAddrResult> GetNonceByAddress(string nodeUri, string address)
+        public static GetNonceByAddrResult GetNonceByAddress(string nodeUri, string address)
         {
             address.ThrowIfNullOrEmpty("remoteAddress is empty");
 
             var parameters = new { address };
 
-            return await CallRpc<GetNonceByAddrResult>(nodeUri, "getnoncebyaddr", parameters);
+            return CallRpc<GetNonceByAddrResult>(nodeUri, "getnoncebyaddr", parameters);
         }
 
-        public static async Task<GetRegistrantResult> GetRegistrant(string nodeUri, string name)
+        public static GetRegistrantResult GetRegistrant(string nodeUri, string name)
         {
             name.ThrowIfNullOrEmpty("name is empty");
 
             var parameters = new { name };
 
-            return await CallRpc<GetRegistrantResult>(nodeUri, "getregistrant", parameters);
+            return CallRpc<GetRegistrantResult>(nodeUri, "getregistrant", parameters);
         }
 
-        public static async Task<GetLatestBlockHashResult> GetLatestBlockHash(string nodeUri)
+        public static GetLatestBlockHashResult GetLatestBlockHash(string nodeUri)
         {
-            return await CallRpc<GetLatestBlockHashResult>(nodeUri, "getlatestblockhash");
+            return CallRpc<GetLatestBlockHashResult>(nodeUri, "getlatestblockhash");
         }
 
-        public static async Task<string> SendRawTransaction(string nodeUri, Transaction transaction)
+        public static string SendRawTransaction(string nodeUri, Transaction transaction)
         {
             var bytes = transaction.ToBytes();
 
             var parameters = new { tx = bytes.ToHexString() };
 
-            return await CallRpc<string>(nodeUri, "sendrawtransaction", parameters);
+            return CallRpc<string>(nodeUri, "sendrawtransaction", parameters);
         }
 
-        public static async Task<string> TransferTo(
+        public static string TransferTo(
             string toAddress, 
             Amount amount, 
             ITransactionSender transactionSender, 
@@ -155,7 +154,7 @@ namespace NknSdk.Common.Rpc
                 throw new Exception();
             }
 
-            var nonce = options.Nonce ?? (await transactionSender.GetNonceAsync()).Nonce.GetValueOrDefault();
+            var nonce = options.Nonce ?? (transactionSender.GetNonceAsync()).Nonce.GetValueOrDefault();
             
             var signatureRedeem = Address.PublicKeyToSignatureRedeem(transactionSender.PublicKey);
             
@@ -165,53 +164,53 @@ namespace NknSdk.Common.Rpc
             
             var tx = transactionSender.CreateTransaction(payload, nonce, options);
 
-            return await transactionSender.SendTransactionAsync(tx);
+            return transactionSender.SendTransactionAsync(tx);
         }
 
-        public static async Task<string> RegisterName(
+        public static string RegisterName(
             string name, 
             ITransactionSender transactionSender, 
             TransactionOptions options)
         {
-            var nonce = options.Nonce ?? (await transactionSender.GetNonceAsync()).Nonce.GetValueOrDefault();            
+            var nonce = options.Nonce ?? (transactionSender.GetNonceAsync()).Nonce.GetValueOrDefault();            
             
             var payload = TransactionFactory.MakeRegisterNamePayload(transactionSender.PublicKey, name, options.Fee.GetValueOrDefault());            
             
             var tx = transactionSender.CreateTransaction(payload, nonce, options);
 
-            return await transactionSender.SendTransactionAsync(tx);
+            return transactionSender.SendTransactionAsync(tx);
         }
 
-        public static async Task<string> TransferName(
+        public static string TransferName(
             string name, 
             string recipient, 
             ITransactionSender transactionSender,
             TransactionOptions options)
         {
-            var nonce = options.Nonce ?? (await transactionSender.GetNonceAsync()).Nonce.GetValueOrDefault();            
+            var nonce = options.Nonce ?? (transactionSender.GetNonceAsync()).Nonce.GetValueOrDefault();            
             
             var payload = TransactionFactory.MakeTransferNamePayload(name, transactionSender.PublicKey, recipient);            
             
             var tx = transactionSender.CreateTransaction(payload, nonce, options);
 
-            return await transactionSender.SendTransactionAsync(tx);
+            return transactionSender.SendTransactionAsync(tx);
         }
 
-        public static async Task<string> DeleteName(
+        public static string DeleteName(
             string name, 
             ITransactionSender transactionSender,
             TransactionOptions options)
         {
-            var nonce = options.Nonce ?? (await transactionSender.GetNonceAsync()).Nonce.GetValueOrDefault();
+            var nonce = options.Nonce ?? (transactionSender.GetNonceAsync()).Nonce.GetValueOrDefault();
             
             var payload = TransactionFactory.MakeDeleteNamePayload(transactionSender.PublicKey, name);
             
             var tx = transactionSender.CreateTransaction(payload, nonce, options);
 
-            return await transactionSender.SendTransactionAsync(tx);
+            return transactionSender.SendTransactionAsync(tx);
         }
 
-        public static async Task<string> Subscribe(
+        public static string Subscribe(
             string topic, 
             int duration, 
             string identifier, 
@@ -219,31 +218,31 @@ namespace NknSdk.Common.Rpc
             ITransactionSender transactionSender,
             TransactionOptions options)
         {
-            var nonce = options.Nonce ?? (await transactionSender.GetNonceAsync()).Nonce.GetValueOrDefault();
+            var nonce = options.Nonce ?? (transactionSender.GetNonceAsync()).Nonce.GetValueOrDefault();
             
             var payload = TransactionFactory.MakeSubscribePayload(transactionSender.PublicKey, identifier, topic, duration, meta);
             
             var tx = transactionSender.CreateTransaction(payload, nonce, options);
 
-            return await transactionSender.SendTransactionAsync(tx);
+            return transactionSender.SendTransactionAsync(tx);
         }
 
-        public static async Task<string> Unsubscribe(
+        public static string Unsubscribe(
             string topic,
             string identifier,
             ITransactionSender transactionSender,
             TransactionOptions options)
         {
-            var nonce = options.Nonce ?? (await transactionSender.GetNonceAsync()).Nonce.GetValueOrDefault();
+            var nonce = options.Nonce ?? (transactionSender.GetNonceAsync()).Nonce.GetValueOrDefault();
             
             var payload = TransactionFactory.MakeUnsubscribePayload(transactionSender.PublicKey, topic, identifier);
             
             var tx = transactionSender.CreateTransaction(payload, nonce, options);
 
-            return await transactionSender.SendTransactionAsync(tx);
+            return transactionSender.SendTransactionAsync(tx);
         }
 
-        private static async Task<T> CallRpc<T>(string nodeUri, string method, object parameters = null)
+        private static T CallRpc<T>(string nodeUri, string method, object parameters = null)
         {
             nodeUri.ThrowIfNullOrEmpty("address is empty");
             method.ThrowIfNullOrEmpty("method is empty");
@@ -261,23 +260,23 @@ namespace NknSdk.Common.Rpc
                 { "params", parameters }
             };
 
-            var data = JsonSerializer.Serialize(values);
+            var data = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(values));
 
             var requestContent = new ByteArrayContent(data);
 
-            var response = await httpClient.PostAsync(nodeUri, requestContent);
+            var response = httpClient.PostAsync(nodeUri, requestContent).GetAwaiter().GetResult();
             if (response.IsSuccessStatusCode == false)
             {
                 throw new ServerException($"Unsuccessful Rpc call. Node uri: {nodeUri} | Method: {method}");
             }
 
-            var responseContent = await response.Content.ReadAsStringAsync();
+            var responseContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
             if (string.IsNullOrWhiteSpace(responseContent))
             {
                 throw new ServerException("rpc response is empty");
             }
 
-            var rpcResponse = JsonSerializer.Deserialize<RpcResponse<T>>(responseContent, StandardResolver.CamelCase);
+            var rpcResponse = JsonConvert.DeserializeObject<RpcResponse<T>>(responseContent);
             if (rpcResponse.IsSuccess == false)
             {
                 throw new ServerException(rpcResponse.Error.Data);

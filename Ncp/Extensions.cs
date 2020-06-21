@@ -92,22 +92,22 @@ namespace Ncp
             }, token);
         }
 
-        public static async Task<Channel<T>> FirstAsync<T>(this IEnumerable<Task<Channel<T>>> tasks, CancellationTokenSource tokenSource = default)
+        public static Channel<T> FirstAsync<T>(this IEnumerable<Task<Channel<T>>> tasks, CancellationTokenSource tokenSource = default)
         {
-            var channel = await await Task.WhenAny(tasks);
+            var channel = Task.WhenAny(tasks);
 
             tokenSource.Cancel();
 
-            return channel;
+            return channel.Result.Result;
         }
 
-        public static async Task<T> FirstValueAsync<T>(this IEnumerable<Task<T>> tasks, CancellationTokenSource tokenSource = default)
+        public static T FirstValueAsync<T>(this IEnumerable<Task<T>> tasks, CancellationTokenSource tokenSource = default)
         {
             try
             {
                // await Task.Delay(2);
 
-                var result = await await Task.WhenAny(tasks);
+                var result = Task.WhenAny(tasks).GetAwaiter().GetResult().GetAwaiter().GetResult();
 
                 tokenSource.Cancel();
 

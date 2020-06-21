@@ -10,10 +10,10 @@ namespace NknSdk.Common
     {
         string PublicKey { get; }
 
-        Task<GetNonceByAddrResult> GetNonceAsync();
+        GetNonceByAddrResult GetNonceAsync();
 
         Transaction CreateTransaction(Payload payload, long nonce, TransactionOptions options);
 
-        Task<string> SendTransactionAsync(Transaction tx);
+        string SendTransactionAsync(Transaction tx);
     }
 }

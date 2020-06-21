@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 
 using Norgerman.Cryptography.Scrypt;
-using Utf8Json;
 
 using NknSdk.Common;
 using NknSdk.Common.Protobuf.Transaction;
@@ -11,6 +10,7 @@ using NknSdk.Common.Options;
 using NknSdk.Common.Rpc;
 using NknSdk.Common.Rpc.Results;
 using NknSdk.Wallet.Models;
+using Newtonsoft.Json;
 
 namespace NknSdk.Wallet
 {
@@ -160,19 +160,19 @@ namespace NknSdk.Wallet
             return Wallet.Decrypt(wallet, options);
         }
 
-        public static async Task<GetLatestBlockHashResult> GetLatestBlockAsync(WalletOptions options = null)
+        public static GetLatestBlockHashResult GetLatestBlockAsync(WalletOptions options = null)
         {
             options = options ?? new WalletOptions();
-            return await RpcClient.GetLatestBlockHash(options.RpcServerAddress);
+            return RpcClient.GetLatestBlockHash(options.RpcServerAddress);
         }
 
-        public static async Task<GetRegistrantResult> GetRegistrantAsync(string name, WalletOptions options = null)
+        public static GetRegistrantResult GetRegistrantAsync(string name, WalletOptions options = null)
         {
             options = options ?? new WalletOptions();
-            return await RpcClient.GetRegistrant(options.RpcServerAddress, name);
+            return RpcClient.GetRegistrant(options.RpcServerAddress, name);
         }
 
-        public static Task<GetSubscribersWithMetadataResult> GetSubscribersWithMetadataAsync(
+        public static GetSubscribersWithMetadataResult GetSubscribersWithMetadataAsync(
             string topic,
             WalletOptions options = null)
         {
@@ -180,7 +180,7 @@ namespace NknSdk.Wallet
             return RpcClient.GetSubscribersWithMetadata(options.RpcServerAddress, topic, options.Offset, options.Limit, options.TxPool);
         }
 
-        public static Task<GetSubscribersResult> GetSubscribersAsync(
+        public static GetSubscribersResult GetSubscribersAsync(
             string topic,
             WalletOptions options = null)
         {
@@ -188,13 +188,13 @@ namespace NknSdk.Wallet
             return RpcClient.GetSubscribers(options.RpcServerAddress, topic, options.Offset, options.Limit, options.TxPool);
         }
 
-        public static Task<int> GetSubscribersCountAsync(string topic, WalletOptions options = null)
+        public static int GetSubscribersCountAsync(string topic, WalletOptions options = null)
         {
             options = options ?? new WalletOptions();
             return RpcClient.GetSubscribersCount(options.RpcServerAddress, topic);
         }
 
-        public static Task<GetSubscriptionResult> GetSubscriptionAsync(
+        public static GetSubscriptionResult GetSubscriptionAsync(
             string topic, 
             string subscriber, 
             WalletOptions options = null)
@@ -203,19 +203,19 @@ namespace NknSdk.Wallet
             return RpcClient.GetSubscription(options.RpcServerAddress, topic, subscriber);
         }
 
-        public static Task<GetBalanceResult> GetBalanceAsync(string address, WalletOptions options = null)
+        public static GetBalanceResult GetBalanceAsync(string address, WalletOptions options = null)
         {
             options = options ?? new WalletOptions();
             return RpcClient.GetBalanceByAddress(options.RpcServerAddress, address);
         }
 
-        public static Task<GetNonceByAddrResult> GetNonceAsync(string address, WalletOptions options = null)
+        public static GetNonceByAddrResult GetNonceAsync(string address, WalletOptions options = null)
         {
             options = options ?? new WalletOptions();
             return RpcClient.GetNonceByAddress(options.RpcServerAddress, address);
         }
 
-        public static Task<string> SendTransactionAsync(Transaction tx, TransactionOptions options = null)
+        public static string SendTransactionAsync(Transaction tx, TransactionOptions options = null)
         {
             options = options ?? new TransactionOptions();
             return RpcClient.SendRawTransaction(options.RpcServerAddress, tx);
@@ -254,7 +254,7 @@ namespace NknSdk.Wallet
                 };
             }
 
-            var result = JsonSerializer.ToJsonString(wallet);
+            var result = JsonConvert.SerializeObject(wallet);
 
             return result;
         }
@@ -287,67 +287,67 @@ namespace NknSdk.Wallet
             return this.VerifyPasswordKey(passwordKey);
         }
 
-        public Task<GetLatestBlockHashResult> GetLatestBlockAsync() => Wallet.GetLatestBlockAsync(this.Options);
+        public GetLatestBlockHashResult GetLatestBlockAsync() => Wallet.GetLatestBlockAsync(this.Options);
 
-        public Task<GetRegistrantResult> GetRegistrantAsync(string name) => Wallet.GetRegistrantAsync(name, this.Options);
+        public GetRegistrantResult GetRegistrantAsync(string name) => Wallet.GetRegistrantAsync(name, this.Options);
 
-        public Task<GetSubscribersWithMetadataResult> GetSubscribersWithMetadataAsync(string topic)
+        public GetSubscribersWithMetadataResult GetSubscribersWithMetadataAsync(string topic)
         {
             return Wallet.GetSubscribersWithMetadataAsync(topic, this.Options);
         }
 
-        public Task<GetSubscribersResult> GetSubscribersAsync(string topic)
+        public GetSubscribersResult GetSubscribersAsync(string topic)
         {
             return Wallet.GetSubscribersAsync(topic, this.Options);
         }
 
-        public Task<int> GetSubscribersCountAsync(string topic) => Wallet.GetSubscribersCountAsync(topic, this.Options);
+        public int GetSubscribersCountAsync(string topic) => Wallet.GetSubscribersCountAsync(topic, this.Options);
 
-        public Task<GetSubscriptionResult> GetSubscriptionAsync(string topic, string subscriber)
+        public GetSubscriptionResult GetSubscriptionAsync(string topic, string subscriber)
             => RpcClient.GetSubscription(this.Options.RpcServerAddress, topic, subscriber);
 
-        public Task<GetBalanceResult> GetBalanceAsync(string address = "")
+        public GetBalanceResult GetBalanceAsync(string address = "")
         {
             var addr = string.IsNullOrEmpty(address) ? this.Address : address;
 
             return Wallet.GetBalanceAsync(addr, this.Options);
         }
 
-        public Task<GetNonceByAddrResult> GetNonceAsync() => Wallet.GetNonceAsync(this.account.Address, this.Options);     
+        public GetNonceByAddrResult GetNonceAsync() => Wallet.GetNonceAsync(this.account.Address, this.Options);     
 
-        public Task<string> SendTransactionAsync(Transaction tx) => Wallet.SendTransactionAsync(tx, TransactionOptions.NewFrom(this.Options));
+        public string SendTransactionAsync(Transaction tx) => Wallet.SendTransactionAsync(tx, TransactionOptions.NewFrom(this.Options));
 
-        public Task<string> TransferToAsync(string toAddress, decimal amount, TransactionOptions options = null)
+        public string TransferToAsync(string toAddress, decimal amount, TransactionOptions options = null)
         {
             options = options ?? new TransactionOptions();
             return RpcClient.TransferTo(toAddress, new Amount(amount), this, options);
         }
 
-        public Task<string> RegisterNameAsync(string name, TransactionOptions options = null)
+        public string RegisterNameAsync(string name, TransactionOptions options = null)
         {
             options = options ?? new TransactionOptions();
             return RpcClient.RegisterName(name, this, options);
         }
 
-        public Task<string> TransferNameAsync(string name, string recipient, TransactionOptions options = null)
+        public string TransferNameAsync(string name, string recipient, TransactionOptions options = null)
         {
             options = options ?? new TransactionOptions();
             return RpcClient.TransferName(name, recipient, this, options);
         }
 
-        public Task<string> DeleteNameAsync(string name, TransactionOptions options = null)
+        public string DeleteNameAsync(string name, TransactionOptions options = null)
         {
             options = options ?? new TransactionOptions();
             return RpcClient.DeleteName(name, this, options);
         }
 
-        public Task<string> SubscribeAsync(string topic, int duration, string identifier, string meta, TransactionOptions options = null)
+        public string SubscribeAsync(string topic, int duration, string identifier, string meta, TransactionOptions options = null)
         {
             options = options ?? new TransactionOptions();
             return RpcClient.Subscribe(topic, duration, identifier, meta, this, options);
         }
 
-        public Task<string> UnsubscribeAsync(string topic, string identifier, TransactionOptions options = null)
+        public string UnsubscribeAsync(string topic, string identifier, TransactionOptions options = null)
         {
             options = options ?? new TransactionOptions();
             return RpcClient.Unsubscribe(topic, identifier, this, options);
