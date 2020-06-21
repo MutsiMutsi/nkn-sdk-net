@@ -1,5 +1,5 @@
-﻿using NknSdk.Common.Exceptions;
-using Utf8Json;
+﻿using Newtonsoft.Json;
+using NknSdk.Common.Exceptions;
 
 namespace NknSdk.Wallet.Models
 {
@@ -19,7 +19,7 @@ namespace NknSdk.Wallet.Models
 
         public static WalletJson FromJson(string json)
         {
-            var wallet = JsonSerializer.Deserialize<WalletJson>(json);
+            var wallet = JsonConvert.DeserializeObject<WalletJson>(json);
 
             if (wallet.Version == null
                 || wallet.Version < Wallet.MinCompatibleVersion

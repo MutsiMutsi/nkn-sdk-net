@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-using Utf8Json;
-using Utf8Json.Resolvers;
-
 using NknSdk.Common.Protobuf;
 using NknSdk.Common.Protobuf.Transaction;
 using NknSdk.Common.Rpc.Results;
@@ -14,6 +11,8 @@ using NknSdk.Common.Extensions;
 using NknSdk.Common.Options;
 using NknSdk.Wallet;
 using NknSdk.Wallet.Models;
+using Newtonsoft.Json;
+using System.Text;
 
 namespace NknSdk.Common.Rpc
 {
@@ -261,7 +260,7 @@ namespace NknSdk.Common.Rpc
                 { "params", parameters }
             };
 
-            var data = JsonSerializer.Serialize(values);
+            var data = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(values));
 
             var requestContent = new ByteArrayContent(data);
 
@@ -277,7 +276,7 @@ namespace NknSdk.Common.Rpc
                 throw new ServerException("rpc response is empty");
             }
 
-            var rpcResponse = JsonSerializer.Deserialize<RpcResponse<T>>(responseContent, StandardResolver.CamelCase);
+            var rpcResponse = JsonConvert.DeserializeObject<RpcResponse<T>>(responseContent);
             if (rpcResponse.IsSuccess == false)
             {
                 throw new ServerException(rpcResponse.Error.Data);

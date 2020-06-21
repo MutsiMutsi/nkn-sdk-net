@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 
-using Utf8Json;
 using WebSocketSharp;
 
 using Ncp;
@@ -24,6 +23,7 @@ using NknSdk.Common.Rpc;
 using NknSdk.Common.Rpc.Results;
 
 using Constants = NknSdk.Common.Constants;
+using Newtonsoft.Json;
 
 namespace NknSdk.Client
 {
@@ -807,7 +807,7 @@ namespace NknSdk.Client
         private void OnWebSocketOpen(object sender, EventArgs e)
         {
             var message = new { Action = Constants.MessageActions.SetClient, Addr = this.Address };
-            var messageJson = JsonSerializer.ToJsonString(message);
+            var messageJson = JsonConvert.SerializeObject(message);
 
             this.ws.Send(messageJson);
 
@@ -832,12 +832,12 @@ namespace NknSdk.Client
                 return;
             }
 
-            var message = JsonSerializer.Deserialize<Message>(e.Data);
+            var message = JsonConvert.DeserializeObject<Message>(e.Data);
             if (message.HasError && message.Error != Constants.RpcResponseCodes.Success)
             {
                 if (message.Error == Constants.RpcResponseCodes.WrongNode)
                 {
-                    var wrongNodeMessage = JsonSerializer.Deserialize<WrongNodeMessage>(e.Data);
+                    var wrongNodeMessage = JsonConvert.DeserializeObject<WrongNodeMessage>(e.Data);
 
                     this.OnNewWebSocketAddress(wrongNodeMessage.Result);
                 }
@@ -860,7 +860,7 @@ namespace NknSdk.Client
                 case Constants.MessageActions.SetClient:
                     Console.WriteLine("*** Client Connected ***");
 
-                    var setClientMessage = JsonSerializer.Deserialize<SetClientMessage>(e.Data);
+                    var setClientMessage = JsonConvert.DeserializeObject<SetClientMessage>(e.Data);
 
                     this.SignatureChainBlockHash = setClientMessage.Result.SigChainBlockHash;
 
@@ -882,7 +882,7 @@ namespace NknSdk.Client
                     break;
 
                 case Constants.MessageActions.UpdateSigChainBlockHash:
-                    var signatureBlockHashMessage = JsonSerializer.Deserialize<UpdateSigChainBlockHashMessage>(e.Data);
+                    var signatureBlockHashMessage = JsonConvert.DeserializeObject<UpdateSigChainBlockHashMessage>(e.Data);
                     this.SignatureChainBlockHash = signatureBlockHashMessage.Result;
                     break;
 
