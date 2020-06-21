@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ncp", "Ncp\Ncp.csproj", "{1
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NknSdk.Tests", "NknSdk.Tests\NknSdk.Tests.csproj", "{54AFF271-3B41-44F0-99AA-5F673B2C1AD9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{12CAEB1A-13F5-4E21-98C9-D25F04AB9CA1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{54AFF271-3B41-44F0-99AA-5F673B2C1AD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{54AFF271-3B41-44F0-99AA-5F673B2C1AD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{54AFF271-3B41-44F0-99AA-5F673B2C1AD9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12CAEB1A-13F5-4E21-98C9-D25F04AB9CA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12CAEB1A-13F5-4E21-98C9-D25F04AB9CA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12CAEB1A-13F5-4E21-98C9-D25F04AB9CA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12CAEB1A-13F5-4E21-98C9-D25F04AB9CA1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
