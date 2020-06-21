@@ -3,7 +3,7 @@ using System.Text;
 
 using Chaos.NaCl;
 using HashLib;
-using NSec.Cryptography;
+//using NSec.Cryptography;
 
 using NknSdk.Common.Extensions;
 
@@ -17,7 +17,7 @@ namespace NknSdk.Common
         public const int SeedLength = 32;
         public const int SignatureLength = 64;
 
-        public static SignatureAlgorithm Algorithm { get; } = SignatureAlgorithm.Ed25519;
+        //public static SignatureAlgorithm Algorithm { get; } = SignatureAlgorithm.Ed25519;
 
         public static byte[] EncryptSymmetric(byte[] message, byte[] nonce, byte[] sharedKey)
         {
